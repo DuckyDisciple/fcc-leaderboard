@@ -1,30 +1,49 @@
-var data = [{
-                    num: "1.",
-                    img: "http://www.mamadomia.org/img/smile-top-img.png",
-                    username: "Michael Jackson",
-                    recent: "35",
-                    alltime: "104"
-                  },
-                  {
-                    num: "2.",
-                    img: "http://rs304.pbsrc.com/albums/nn180/4chanRus/Awesome%20Face/1213841779552.png~c200",
-                    username: "Debbie Downer",
-                    recent: "20",
-                    alltime: "208"
-                 }];
+var myUrl = "http://fcctop100.herokuapp.com/api/fccusers/top/recent";
+
+var RecentTD = React.createClass({
+  clicked: function(){
+    this.props.clicked();
+  },
+  render: function(){
+    return (
+      <td onClick={this.clicked}
+        className = "recent-header">
+        Recent Score
+      </td>
+    );
+  }
+});
+
+var TotalTD = React.createClass({
+  clicked: function(){
+    this.props.clicked();
+  },
+  render: function(){
+    return (
+      <td onClick={this.clicked}
+        className = "total-header">
+        Total Score
+      </td>
+    );
+  }
+});
 
 var UserRows = React.createClass({
+  showRecent: function(){
+    this.props.onRecent();
+  },
+  showTotal: function(){
+    this.props.onTotal();
+  },
   render: function(){
     var rows = this.props.data.map(function(row,index){
       return (
-        <tr className="example">
+        <tr className="leader-data">
           <td className="num">
             {index+1}
           </td>
-          <td className="pic">
-            <img src={row.img} />
-          </td>
           <td className="name">
+            <img src={row.img} />
             {row.username}
           </td>
           <td className="monthPoints">
@@ -38,13 +57,12 @@ var UserRows = React.createClass({
     });
     return (
       <table className="user-data">
-        <th className="headers">
+        <tr className="headers">
           <td>No.</td>
-          <td></td>
           <td>User</td>
-          <td className="recent-header">Recent Score</td>
-          <td className="total-header">Total Score</td>
-        </th>
+          <RecentTD clicked={this.showRecent} />
+          <TotalTD clicked={this.showTotal} />
+        </tr>
         {rows}
       </table>
     );
@@ -55,9 +73,17 @@ var Leaderboard = React.createClass({
   getInitialState: function(){
     return {data: []};
   },
-  componentDidMount: function(){
+  handleRecentClick: function(){
+    var recentUrl = "http://fcctop100.herokuapp.com/api/fccusers/top/recent";
+    this.getDataFromUrl(recentUrl);
+  },
+  handleTotalClick: function(){
+    var totalUrl = "http://fcctop100.herokuapp.com/api/fccusers/top/alltime";
+    this.getDataFromUrl(totalUrl);
+  },
+  getDataFromUrl: function(url){
     $.ajax({
-      url: this.props.url,
+      url: url,
       dataType: 'json',
       cache: false,
       success: function(data){
@@ -68,13 +94,20 @@ var Leaderboard = React.createClass({
       }.bind(this)
     });
   },
+  componentDidMount: function(){
+    this.getDataFromUrl(this.props.url);
+  },
   render: function() {
     return (
       <div className="leaderContent">  
-        <UserRows data={this.state.data} />
+        <UserRows
+          data = {this.state.data}
+          onRecent = {this.handleRecentClick}
+          onTotal = {this.handleTotalClick}
+        />
       </div>
     );
   }
 });
 
-React.render(<Leaderboard url="http://fcctop100.herokuapp.com/api/fccusers/top/recent" />,document.getElementById("content"));
+React.render(<Leaderboard url={myUrl} />,document.getElementById("content"));
