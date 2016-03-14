@@ -38,6 +38,13 @@ var UserRows = React.createClass({
     });
     return (
       <table className="user-data">
+        <th className="headers">
+          <td>No.</td>
+          <td></td>
+          <td>User</td>
+          <td className="recent-header">Recent Score</td>
+          <td className="total-header">Total Score</td>
+        </th>
         {rows}
       </table>
     );
@@ -45,13 +52,29 @@ var UserRows = React.createClass({
 });
 
 var Leaderboard = React.createClass({
+  getInitialState: function(){
+    return {data: []};
+  },
+  componentDidMount: function(){
+    $.ajax({
+      url: this.props.url,
+      dataType: 'json',
+      cache: false,
+      success: function(data){
+        this.setState({data: data});
+      }.bind(this),
+      error: function(xhr, status, err){
+        console.log(this.props.url, status, err.toString());
+      }.bind(this)
+    });
+  },
   render: function() {
     return (
       <div className="leaderContent">  
-        <UserRows data={this.props.data} />
+        <UserRows data={this.state.data} />
       </div>
     );
   }
 });
 
-React.render(<Leaderboard data={data} />,document.getElementById("content"));
+React.render(<Leaderboard url="http://fcctop100.herokuapp.com/api/fccusers/top/recent" />,document.getElementById("content"));
